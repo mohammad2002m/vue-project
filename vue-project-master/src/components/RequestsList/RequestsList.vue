@@ -1,4 +1,4 @@
-<!-- eslint-disable vue/no-use-v-if-with-v-for -->
+<!-- eslint-disable -->
 <template>
     <div class="container p-3">
       <div class="row">
@@ -19,19 +19,17 @@
           <th>الدائرة الإدارية</th>
           <th>نوع الإجازاة</th>
         </tr>
-          <tr class="row-data" v-if="this.Database.getCurrentUser().role == 'employee'" v-for="(request, index) in this.Database.getRequestArrayWithUserId(this.Database.getCurrentUser())" :key="index">
+          <tr class="row-data" v-if="this.Database.getUserWithId(this.Database.getCurrentUser()).role == 'employee'" v-for="(request, index) in this.Database.getRequestArrayWithUserId(this.Database.getCurrentUser())" :key="index">
             <td> <button @click="ViewDetails(index)" class="see-more"> &#x2B9C; اقرأ المزيد </button> </td>
-            <td> {{ request.status }} </td>
+            <td> {{ request.type }} </td>
             <td> {{ request.management }} </td>
             <td> {{ request.fromDate }} </td>
             <td> {{ request.toDate }} </td>
             <td> {{ request.holidayType }} </td>
           </tr>
-        <p>{{ this.Database.getUserWithId(this.Database.getCurrentUser()).role }}</p>
-          <tr class="row-data" v-if="this.Database.getCurrentUser().role == 'manager'" v-for="(request, index) in this.Database.getRequestArray()" :key="index">
+          <tr class="row-data" v-if="this.Database.getUserWithId(this.Database.getCurrentUser()).role == 'manager'" v-for="(request, index) in this.Database.getRequestArrayWithUserId(this.Database.getCurrentUser())" :key="index">
             <td> <button @click="ViewDetails(index)" class="see-more"> &#x2B9C; اقرأ المزيد </button> </td>
-            <td>{{ Database.getCurrentUser().name }}</td>
-            <td> {{ request.status }} </td>
+            <td> {{ request.type }} </td>
             <td> {{ request.management }} </td>
             <td> {{ request.fromDate }} </td>
             <td> {{ request.toDate }} </td>
@@ -55,7 +53,7 @@ export default {
     NewRequest(){
       this.$router.push('RequestForm')
     },
-    ViewDetails(index){
+    ViewDetails(index){ // id
       console.log(index)
       this.$router.push({name: 'RequestForm' , query: {info: JSON.stringify(this.requestsArray[index])}}) // should send different information
       console.log(this.requestsArray[index]);

@@ -70,7 +70,7 @@ class Database {
   }
 
   static getUserWithId(userId){
-    return this.constructor.getUsersArray().find((user) => user.userId === userId);
+    return Database.getUsersArray().find((user) => user.userId === userId);
   }
 
   static getRequestArray() {
@@ -78,13 +78,13 @@ class Database {
   }
 
   static getRequestArrayWithUserId(userId) {
-    return this.getRequestArray().filters(
+    return Database.getRequestArray().filter(
       (request) => request.userId === userId
     );
   }
 
   static addRequest(request) {
-    const requestTableFromLocalStorage = this.getRequestArray();
+    const requestTableFromLocalStorage = Database.getRequestArray();
     requestTableFromLocalStorage.push(request);
     localStorage.setItem(
       "requestTabel",

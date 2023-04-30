@@ -10,33 +10,32 @@
 
       <FormSectionTitle title="المعلومات الشخصية" />
 
-      <InputText title="الاسم الكامل"  :isReadOnly="formReadOnly" />
+      <InputText v-model="name" title="الاسم الكامل"  :isReadOnly="formReadOnly" />
 
       <div class="row gx-5">
-        <InputText title="الدائرة الإدارية"   :isReadOnly="formReadOnly" />
-        <InputNumber  title="رقم الهاتف"   :isReadOnly="formReadOnly" />
+        <InputText v-model="department" title="الدائرة الإدارية"   :isReadOnly="formReadOnly" />
+        <InputNumber v-model="phoneNumber"  title="رقم الهاتف"   :isReadOnly="formReadOnly" />
       </div>
 
-      <FormSectionTitle title="تفاصيل الإجازة"   :isReadOnly="formReadOnly" />
+      <FormSectionTitle title="تفاصيل الإجازة"/>
 
       <div class="row gx-5">
-        <InputSelect   title="نوع الإجازة" :optionsList="holidayTypes" :isReadOnly="formReadOnly" />
-        <InputSelect title="داخل/خارج البلاد" :optionsList="outOrIn" :isReadOnly="formReadOnly" />
+        <InputSelect v-model="vacationType" title="نوع الإجازة" :optionsList="vacationTypesArray" :isReadOnly="formReadOnly" />
+        <InputSelect v-model="inOrOut" title="داخل/خارج البلاد" :optionsList="inOrOutArray" :isReadOnly="formReadOnly" />
       </div>
 
       <div class="row gx-5">
-        <InputDate title="من تاريخ" :isReadOnly="formReadOnly"/>
-        <InputDate title="إلى تاريخ" :isReadOnly="formReadOnly"/>
+        <InputDate v-model="fromDate" title="من تاريخ" :isReadOnly="formReadOnly"/>
+        <InputDate v-model="toDate" title="إلى تاريخ" :isReadOnly="formReadOnly"/>
       </div>
 
-      <InputTextarea  inputType="textarea" title="سبب الإجازة" :isReadOnly="formReadOnly"/>
+      <InputTextarea v-model="excuse"  inputType="textarea" title="سبب الإجازة" :isReadOnly="formReadOnly"/>
 
       <div style="text-align: center">
         <button class="btn btn-success px-4 py-2"  @click="SubmitButton">إرسال</button>
       </div>
     </div>
   <Copyright title="حقوق الطبع والنشر محفوظة" />
-
 </template>
 
 <script>
@@ -47,7 +46,8 @@ import InputNumber from "./InputNumber.vue";
 import InputSelect from "./InputSelect.vue";
 import InputDate from "./InputDate.vue";
 import InputTextarea from "./InputTextarea.vue";
-// import moment from 'moment';
+import {inOrOutArray , vacationTypesArray} from '../../../constants.js'
+import moment from 'moment';
 export default {
   name: "RequestForm",
   components: {
@@ -61,17 +61,35 @@ export default {
   },
   data() {
     return {
-      outOrIn: ["داخل البلاد", "خارج البلاد"],
-      holidayTypes: [ "سنوية", "رسمية", "مرضية", "زواج", "أمومة", "بدون راتب", "حج", "وفاة قريب مباشر", "وفاة قريب غير مباشر", ],
+      inOrOutArray: inOrOutArray,
+      vacationTypesArray: vacationTypesArray,
       formReadOnly: false,
-
+      name: '',
+      phoneNumber: '',
+      fromDate: moment().format('YYYY-MM-DD').toString(),
+      toDate: moment().format('YYYY-MM-DD').toString(),
+      excuse: '',
+      vacationType: 'سنوية',
+      department: '',
+      inOrOut: 'داخل البلاد',
     };
   },
   mounted(){
   },
   methods: {
+    doSomething(){
+      console.log(this.name)
+      console.log(this.phoneNumber)
+      console.log(this.fromDate)
+      console.log(this.toDate)
+      console.log(this.excuse)
+      console.log(this.vacationType)
+      console.log(this.department)
+      console.log(this.inOrOut)
+      console.log('')
+    },
     SubmitButton() {
-
+      
     },
   },
 };
