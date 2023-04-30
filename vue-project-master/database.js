@@ -10,7 +10,7 @@ class Database {
         username: "Gear5",
         password: "password1",
         role: "employee",
-        email: "luffy@example.com",
+        email: "luffy@gmail.com",
       },
       {
         userId: 2,
@@ -18,15 +18,15 @@ class Database {
         username: "aliEx",
         password: "password2",
         role: "manager",
-        email: "aliExpress@example.com",
+        email: "aliExpress@gmail.com",
       },
       {
         userId: 3,
         name: "Zongli Tendo",
-        username: "zongli",
-        password: "password3",
-        role: "employee",
-        email: "bobjohnson@example.com",
+        username: "test",
+        password: "test",
+        role: "manager",
+        email: "test@gmail.com",
       }
     );
 
@@ -61,6 +61,7 @@ class Database {
   static getCurrentUser() {
     return JSON.parse(localStorage.getItem("currentUser"));
   }
+
   static setCurrentUser(userId) {
     localStorage.setItem("currentUser", JSON.stringify(userId));
   }
