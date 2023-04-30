@@ -1,7 +1,7 @@
 <template>
       <div class="col-md">
         <label for=""> {{ title }} <span>*</span> </label>
-        <textarea v-model="userInput" class="form-control" :placeholder="title" :disabled="isReadOnly" rows="8"> </textarea>
+        <textarea :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="form-control" :placeholder="title" :disabled="isReadOnly" rows="8"> </textarea>
         <label for=""> {{ validMsg }} </label>
       </div>
 </template>
@@ -12,11 +12,11 @@ export default {
   props: {
     placeholder: String,
     title: String,
-    isReadOnly: Boolean
+    isReadOnly: Boolean,
+    modelValue: String,
   },
   data() {
     return {
-      userInput: '',
       validMsg: '',
     }
   },

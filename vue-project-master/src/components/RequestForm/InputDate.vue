@@ -1,7 +1,7 @@
 <template>
       <div class="col-md">
         <label for=""> {{ title }} <span>*</span> </label>
-        <input type="date" v-model="userInput" class="form-control" :placeholder="title"  :disabled="isReadOnly"/>
+        <input type="date" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="form-control" :placeholder="title"  :disabled="isReadOnly"/>
         <label for=""> {{ validMsg }} </label>
       </div>
 </template>
@@ -13,6 +13,7 @@ export default {
   props: {
     placeholder: String,
     title: String,
+    modelValue: String,
     isReadOnly: Boolean
   },
   data() {

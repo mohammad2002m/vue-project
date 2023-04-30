@@ -1,10 +1,7 @@
 <template>
-      <!--
-        :value="inputType == 'date' ? '2023-01-01' : ''"
-      -->
       <div class="col-md">
         <label for=""> {{ title }} <span>*</span> </label>
-        <select class="form-control" :disabled="isReadOnly">
+        <select :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="form-control" :disabled="isReadOnly">
           <option  v-for="(option, index) in optionsList" :key="index" :value="option"> {{ option }} </option>
         </select>
         <label for=""> {{ validMsg }} </label>
@@ -18,6 +15,7 @@ export default {
     placeholder: String,
     title: String,
     optionsList: Array,
+    modelValue: String,
     isReadOnly: Boolean
   },
   data() {
