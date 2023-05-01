@@ -13,7 +13,6 @@
     <hr>
     <table>
       <tr>
-        <th v-if="isManager()">{{ this.Database.getUserWithId(this.Database.getCurrentUser()) }}</th>
         <th>تفاصيل</th>
         <th>الحالة</th>
         <th>إلى تاريخ</th>
@@ -21,48 +20,48 @@
         <th>الدائرة الإدارية</th>
         <th>نوع الإجازاة</th>
       </tr>
-      <tr class="row-data" v-if="this.Database.getUserWithId(this.Database.getCurrentUser()).role == 'employee'"
-        v-for="(request, index) in this.Database.getRequestArrayWithUserId(this.Database.getCurrentUser())" :key="index">
-        <td> <button @click="ViewDetails(this.Database.getCurrentUser())" class="see-more"> &#x2B9C; اقرأ المزيد </button>
-        </td>
+    <tr class="row-data" v-if="this.Database.isCurrentUserManager()"
+        v-for="(request, index) in this.Database.getRequestArray()" :key="index">
+        <td> <button @click="viewDetails(request.userId)" class="see-more"> &#x2B9C; اقرأ المزيد </button> </td> <td> {{ request.type }} </td>
+        <td> {{ request.management }} </td>
+        <td> {{ request.fromDate }} </td>
+        <td> {{ request.toDate }} </td>
+        <td> {{ request.holidayType }} </td>
+      </tr>
+      <tr class="row-data" v-if="!this.Database.isCurrentUserManager()"
+        v-for="(request, index) in this.Database.getRequestArrayWithUserId(this.Database.getCurrentUserId())" :key="index">
+        <td> <button @click="viewDetails(request.userId)" class="see-more"> &#x2B9C; اقرأ المزيد </button> </td>
         <td> {{ request.type }} </td>
         <td> {{ request.management }} </td>
         <td> {{ request.fromDate }} </td>
         <td> {{ request.toDate }} </td>
         <td> {{ request.holidayType }} </td>
       </tr>
-      <tr class="row-data" v-if="this.Database.getUserWithId(this.Database.getCurrentUser()).role == 'manager'"
-        v-for="(request, index) in this.Database.getRequestArrayWithUserId(this.Database.getCurrentUser())" :key="index">
-        <td> <button @click="ViewDetails(this.Database.getCurrentUser())" class="see-more"> &#x2B9C; اقرأ المزيد </button>
-        </td>
-        <td> {{ request.type }} </td>
-        <td> {{ request.management }} </td>
-        <td> {{ request.fromDate }} </td>
-        <td> {{ request.toDate }} </td>
-        <td> {{ request.holidayType }} </td>
-      </tr>
+   
     </table>
 
-    <div v-if="this.Database.getUserWithId(this.Database.getCurrentUser()).role == 'employee'" style="display:block; text-align: center; margin-top: 50px;">
-      <button @click="NewRequest" class="btn btn-success px-5 py-3"> تقديم طلب جديد </button>
+    <div v-if="!this.Database.isCurrentUserManager()" style="display:block; text-align: center; margin-top: 50px;">
+      <button @click="newRequest" class="btn btn-success px-5 py-3"> تقديم طلب جديد </button>
     </div>
   </div>
 </template>
  
 <script>
 
+
 export default {
   name: 'List',
+  mounted() {
+      console.log(this.Database.getCurrentUser())
+      console.log(!this.Database.isCurrentUserManager())
+  },
   methods: {
-    NewRequest() {
+    newRequest() {
       this.$router.push('RequestForm')
     },
-    ViewDetails(id) {
+    viewDetails(id) {
       this.$router.push({ name: 'RequestForm', query: { userId: JSON.stringify(id) } })
     },
-    isManager() {
-      return this.Database.getCurrentUser().role === 'manager';
-    }
   },
 }
 </script>

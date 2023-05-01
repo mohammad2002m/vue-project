@@ -30,6 +30,7 @@
   </div>
 </template>
 
+
 <script>
 
 export default {
@@ -49,7 +50,7 @@ export default {
         if (users[i].username == this.username && users[i].password == this.password) {
           this.$router.push('List');
           isFound = true;
-          this.Database.setCurrentUser(users[i].userId);
+          this.Database.setCurrentUserId(users[i].userId);
           break;
         }
       }

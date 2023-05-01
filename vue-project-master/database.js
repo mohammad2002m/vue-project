@@ -43,7 +43,7 @@ class Database {
         fromDate: "2023-06-01",
         toDate: "2023-06-02",
         type: "reject",
-        userId: 2,
+        userId: 1,
       },
       {
         reason: "Personal Day",
@@ -58,12 +58,16 @@ class Database {
     localStorage.setItem("requestTable", JSON.stringify(requestTable));
   }
 
-  static getCurrentUser() {
-    return JSON.parse(localStorage.getItem("currentUser"));
+  static getCurrentUserId() {
+    return JSON.parse(localStorage.getItem("currentUserId"));
   }
 
-  static setCurrentUser(userId) {
-    localStorage.setItem("currentUser", JSON.stringify(userId));
+  static setCurrentUserId(userId) {
+    localStorage.setItem("currentUserId", JSON.stringify(userId));
+  }
+
+  static getCurrentUser() {
+    return Database.getUserWithId(JSON.parse(localStorage.getItem("currentUserId")));
   }
 
   static getUsersArray() {
@@ -82,6 +86,10 @@ class Database {
     return Database.getRequestArray().filter(
       (request) => request.userId === userId
     );
+  }
+
+  static isCurrentUserManager(){
+    return Database.getCurrentUser().role == "manager";
   }
 
   static addRequest(request) {
