@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Login from '../components/Login/Login.vue'
+import SignUp from '../components/RequestForm/SignUp.vue'
 import List from '../components/RequestsList/RequestsList.vue'
 import RequestForm from '../components/RequestForm/RequestForm.vue'
-
 
 const routes = [
   {
@@ -16,6 +16,12 @@ const routes = [
     path: '/List',
     params: true,
     component: List,
+  },
+  {
+    name: 'SignUp',
+    path: '/SignUp',
+    params: true,
+    component: SignUp,
   },
 {
   name: 'RequestForm',

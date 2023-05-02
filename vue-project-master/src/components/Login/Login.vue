@@ -5,6 +5,7 @@
 
     <div class="rounded-top box-header"> تسجيل الدخول </div>
 
+    <div class="line"> </div>
 
     <div style="padding-left: 30px; padding-right: 30px; padding-bottom: 30px; padding-top: 20px;">
 
@@ -44,7 +45,7 @@ export default {
   methods: {
     Login() {
       let isFound = false;
-      this.Database.initDatabase();
+      // this.Database.initDatabase();
       const users = this.Database.getUsersArray();
       for (let i = 0; i < users.length; i++) {
         if (users[i].username == this.username && users[i].password == this.password) {
@@ -80,7 +81,7 @@ export default {
 
 @media (min-width: 0px) {
   .box {
-    width: 86%;
+    width: 74%;
   }
 
   .line {
@@ -91,32 +92,34 @@ export default {
     color: black;
     background-color: none;
     text-align: center;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
   }
 }
 
 @media (min-width: 576px) {
   .box {
-    width: 400px;
-    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    width: 430px;
+    border: 1px lightgray solid;
   }
 
   .line {
     display: block;
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 
   .box-header {
     text-align: center;
-    background-color: rgb(25, 135, 85);
+    color: black;
     padding: 20px;
-    color: white;
-    margin-bottom: 20px;
   }
 }
 
 .box {
+  border-color: lightgrey;
+  padding-top: 1rem;
   margin: auto;
-  border-radius: 5px;
+  border-radius: 3px;
 }
 
 img {
@@ -130,5 +133,12 @@ img {
 .input-with-label label {
   margin-right: 5px;
   margin-bottom: 8px;
+}
+.line {
+  height: 1px;
+  background-color: lightgrey;
+  margin-left: 2rem;
+  margin-right: 2rem;
+  margin-bottom: 1.5rem;
 }
 </style>

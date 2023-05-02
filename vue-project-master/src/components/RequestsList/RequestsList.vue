@@ -1,17 +1,8 @@
 <!-- eslint-disable -->
 <template>
-  <div class="container p-3">
-    <div class="row">
-      <div class="col fw-bold"> تسجيل الخروج </div>
-      <div class="col fw-bold">قائمة طلبات الإجازات</div>
-      <div class="col fw-bold" style="display:flex; justify-content: flex-end;">
-        <span class="title"> جامعة الخليل </span>
-        <img style="width: 23%;padding-left: 1rem;"
-          src="https://cdn.localized.world/organizations/190/0fbfe698-e32e-44fc-bd9b-01bfc256d8b3.png" alt="">
-      </div>
-    </div>
-    <hr>
-    <table>
+  <TopNavigationBar number="2" />
+  <div class="container py-5">
+<table>
       <tr>
         <th>تفاصيل</th>
         <th>الحالة</th>
@@ -19,25 +10,29 @@
         <th>من تاريخ</th>
         <th>الدائرة الإدارية</th>
         <th>نوع الإجازاة</th>
+        <th v-if="this.Database.isCurrentUserManager()">اسم الموظف</th>
       </tr>
-    <tr class="row-data" v-if="this.Database.isCurrentUserManager()"
+      <tr class="row-data" v-if="this.Database.isCurrentUserManager()"
         v-for="(request, index) in this.Database.getRequestArray()" :key="index">
-        <td> <button @click="viewDetails(request.userId)" class="see-more"> &#x2B9C; اقرأ المزيد </button> </td> <td> {{ request.type }} </td>
-        <td> {{ request.management }} </td>
+        <td> <button @click="viewDetails(request.userId)" class="see-more"> &#x2B9C; اقرأ المزيد </button> </td>
+        <td> {{ request.status}} </td>
         <td> {{ request.fromDate }} </td>
         <td> {{ request.toDate }} </td>
-        <td> {{ request.holidayType }} </td>
+        <td> {{ request.management }} </td>
+        <td>{{ request.holidayType }}</td>
+        <td> {{ this.Database.getUserWithId(request.userId).name }} </td>
+
       </tr>
       <tr class="row-data" v-if="!this.Database.isCurrentUserManager()"
-        v-for="(request, index) in this.Database.getRequestArrayWithUserId(this.Database.getCurrentUserId())" :key="index">
-        <td> <button @click="viewDetails(request.userId)" class="see-more"> &#x2B9C; اقرأ المزيد </button> </td>
-        <td> {{ request.type }} </td>
-        <td> {{ request.management }} </td>
-        <td> {{ request.fromDate }} </td>
+        v-for="(request, index) in this.Database.getRequestArrayWithUserId(this.Database.getCurrentUserId())"
+        :key="index">
+        <td> <button @click="viewDetails(request.requestId)" class="see-more"> &#x2B9C; اقرأ المزيد </button> </td>
+        <td>{{ request.status}}</td>
         <td> {{ request.toDate }} </td>
+        <td> {{ request.fromDate }} </td>
+        <td> {{ request.management }} </td>
         <td> {{ request.holidayType }} </td>
       </tr>
-   
     </table>
 
     <div v-if="!this.Database.isCurrentUserManager()" style="display:block; text-align: center; margin-top: 50px;">
@@ -47,20 +42,22 @@
 </template>
  
 <script>
-
-
+import TopNavigationBar from '../RequestForm/TopNavigationBar.vue'
 export default {
   name: 'List',
   mounted() {
-      console.log(this.Database.getCurrentUser())
-      console.log(!this.Database.isCurrentUserManager())
+      // console.log(this.Database.getCurrentUser())
+      // console.log(!this.Database.isCurrentUserManager())
+  },
+  components: {
+    TopNavigationBar,
   },
   methods: {
     newRequest() {
       this.$router.push('RequestForm')
     },
-    viewDetails(id) {
-      this.$router.push({ name: 'RequestForm', query: { userId: JSON.stringify(id) } })
+    viewDetails(requestId) {
+      this.$router.push({ name: 'RequestForm', query: { requestId: JSON.stringify(requestId) } })
     },
   },
 }

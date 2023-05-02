@@ -1,24 +1,28 @@
 <template>
       <div class="col-md">
         <label for=""> {{ title }} <span>*</span> </label>
-        <input type="date" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="form-control" :placeholder="title"  :disabled="isReadOnly"/>
+        <input type="date"
+         :value="modelValue"
+         @input="$emit('update:modelValue', $event.target.value)"
+         :class="'form-control ' + classValue"
+         :placeholder="title"
+         :disabled="isReadOnly"/>
         <label for=""> {{ validMsg }} </label>
       </div>
 </template>
 
 <script>
-import moment from 'moment';
 export default {
   name: 'InputDate',
   props: {
     placeholder: String,
     title: String,
     modelValue: String,
-    isReadOnly: Boolean
+    isReadOnly: Boolean,
+    classValue: String,
   },
   data() {
     return {
-      userInput: moment(new Date()).format('YYYY-MM-DD'),
       validMsg: '',
     }
   },
@@ -33,7 +37,7 @@ export default {
   }
   
   div {
-    margin-bottom: 3rem;
+    margin-bottom: 1rem;
     direction: rtl;
   }
   input {

@@ -1,7 +1,7 @@
 <template>
       <div class="col-md">
         <label for=""> {{ title }} <span>*</span> </label>
-        <select :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="form-control" :disabled="isReadOnly">
+        <select :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" :class="'form-control ' + classValue" :disabled="isReadOnly">
           <option  v-for="(option, index) in optionsList" :key="index" :value="option"> {{ option }} </option>
         </select>
         <label for=""> {{ validMsg }} </label>
@@ -16,7 +16,8 @@ export default {
     title: String,
     optionsList: Array,
     modelValue: String,
-    isReadOnly: Boolean
+    isReadOnly: Boolean,
+    classValue: String,
   },
   data() {
     return {
@@ -34,7 +35,7 @@ export default {
   }
   
   div {
-    margin-bottom: 3rem;
+    margin-bottom: 1rem;
     direction: rtl;
   }
   select {

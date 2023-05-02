@@ -1,7 +1,7 @@
 <template>
       <div class="col-md">
         <label for=""> {{ title }} <span>*</span> </label>
-        <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="form-control" :placeholder="title"  :disabled="isReadOnly"/>
+        <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" :class="'form-control ' + classValue" :placeholder="title"  :disabled="isReadOnly"/>
         <label for=""> {{ validMsg }} </label>
       </div>
 </template>
@@ -13,7 +13,8 @@ export default {
     placeholder: String,
     title: String,
     isReadOnly: Boolean,
-    modelValue: String
+    modelValue: String,
+    classValue: String,
   },
   data() {
     return {
@@ -31,7 +32,7 @@ export default {
   }
   
   div {
-    margin-bottom: 3rem;
+    margin-bottom: 1rem;
     direction: rtl;
   }
   input {
