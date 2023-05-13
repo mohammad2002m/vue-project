@@ -1,3 +1,4 @@
+import {Status} from './constants.js';
 class Database {
   static currentUserId = null;
   static initDatabase() {
@@ -7,8 +8,8 @@ class Database {
       {
         userId: 1,
         name: "قصي أبو سوط",
-        username: "qusay",
-        password: "pass1",
+        username: "a",
+        password: "a",
         role: "employee",
         email: "q2016@gmail.com",
         phoneNumber: "0599382984",
@@ -16,8 +17,8 @@ class Database {
       {
         userId: 2,
         name: "محمد بن بلال",
-        username: "abusager",
-        password: "moz",
+        username: "b",
+        password: "b",
         role: "employee",
         email: "moh2020@gmail.com",
         phoneNumber: "0569581089",
@@ -25,8 +26,17 @@ class Database {
       {
         userId: 3,
         name: "أبو شريف",
-        username: "test",
-        password: "test",
+        username: "c",
+        password: "c",
+        role: "manager",
+        email: "test@gmail.com",
+        phoneNumber: "0595118296",
+      },
+      {
+        userId: 4,
+        name: "محمد بلال",
+        username: "d",
+        password: "d",
         role: "manager",
         email: "test@gmail.com",
         phoneNumber: "0595118296",
@@ -39,33 +49,36 @@ class Database {
         management: "كلية التكنولوجيا",
         fromDate: "2023-05-01",
         toDate: "2023-05-05",
-        status: "مقبول",
+        status: Status.NotSeen,
         inOrOut: "داخل البلاد",
         userId: 1,
         holidayReason: "طشة مع العائلة الكريمة",
-        requestId: 1,
+        requestId: 0,
+        rejectReason: '',
       },
       {
         holidayType: "زواج",
         management: "شؤون الطلبة",
         fromDate: "2023-06-01",
         toDate: "2023-06-02",
-        status: "مرفوض",
+        status: Status.Seen,
         inOrOut: "خارج البلاد",
         userId: 2,
         holidayReason: "التعرض لاصابة بمرض السرطان",
-        requestId: 2,
+        requestId: 1,
+        rejectReason: '',
       },
       {
         holidayType: "رسمية",
         management: "كلية الطب",
         fromDate: "2023-07-01",
         toDate: "2023-07-01",
-        status: "قيد المراجعة",
+        status: Status.Rejected,
         inOrOut: "داخل البلاد",
         userId: 3,
         holidayReason: "لاسباب شخصية لا الإفصاح عنها",
-        requestId: 3,
+        requestId: 2,
+        rejectReason: '',
       }
     );
 
@@ -130,12 +143,54 @@ class Database {
   }
 
   static addRequest(request) {
+    console.log("test 22 ")
     const requestTableFromLocalStorage = Database.getRequestArray();
     requestTableFromLocalStorage.push(request);
     localStorage.setItem(
       "requestTable",
       JSON.stringify(requestTableFromLocalStorage)
     );
+  }
+  static isActionTaken(requestId){
+    let request = Database.getRequestWithId(requestId)
+    return (request.status.comp == Status.Accepted.comp) || (request.status.comp == Status.Rejected.comp);
+  }
+  static isRequestRejected(requestId){
+    let request = Database.getRequestWithId(requestId)
+    return request.status.comp == Status.Rejected.comp;
+  }
+
+  static rejectRequest(requestId , rejectReason){
+    const requests = Database.getRequestArray();
+    requests.filter((request) => {
+      if (request.requestId == requestId){
+        request.status = Status.Rejected;
+        request.rejectReason = rejectReason;
+      }
+    })
+    localStorage.setItem("requestTable" , JSON.stringify(requests));
+  }
+  static acceptRequest(requestId){
+    const requests = Database.getRequestArray();
+    requests.filter((request) => {
+      if (request.requestId == requestId){
+        request.status = Status.Accepted;
+      }
+    })
+    localStorage.setItem("requestTable" , JSON.stringify(requests));
+  }
+  static makeRequestSeen(requestId){
+    const requests = Database.getRequestArray();
+    requests.filter((request) => {
+      if (request.requestId == requestId){
+        request.status = Status.Seen;
+      }
+    })
+    localStorage.setItem("requestTable" , JSON.stringify(requests));
+
+  }
+  static getUniqueId(){
+    return Database.getRequestArray().length;
   }
 }
 

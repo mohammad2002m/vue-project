@@ -1,16 +1,21 @@
 <template>
-  <TopNavigationBar number="1" />
+  <TopNavigationBar number="3" />
+  <!-- Alert -->
+  <div id="success-alert" class="alert alert-success alert-dismissible fade show hide-alert" role="alert">
+    تم إرسال طلب الإجازة بنجاح
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
   <div class="container col-xl-9 p-5 gx-5  rounded box">
     <span class="form-title"> نموذج طلب إجازة </span>
 
-    <div v-if="this.Database.isCurrentUserManager()">
+    <div v-if="this.Database.isCurrentUserManager() || formReadOnly">
       <FormSectionTitle title="المعلومات الشخصية" />
 
-      <InputText v-model="v$.fullName.$model" :classValue="classValue(v$.fullName.$dirty , v$.fullName.$error)" title="الاسم الكامل" :isReadOnly="formReadOnly" />
+      <FormComponent type="text" v-model="v$.fullName.$model" :classValue="classValue(v$.fullName.$dirty , v$.fullName.$error)" title="الاسم الكامل" :isReadOnly="formReadOnly" />
 
       <div class="row gx-5">
-        <InputText v-model="v$.department.$model" :classValue="classValue(v$.department.$dirty , v$.department.$error)" title="الدائرة الإدارية" :isReadOnly="formReadOnly" />
-        <InputNumber v-model="v$.phoneNumber.$model" :classValue="classValue(v$.phoneNumber.$dirty , v$.phoneNumber.$error)" title="رقم الهاتف" :isReadOnly="formReadOnly" />
+        <FormComponent type="text"   v-model="v$.department.$model" :classValue="classValue(v$.department.$dirty , v$.department.$error)" title="الدائرة الإدارية" :isReadOnly="formReadOnly" />
+        <FormComponent type="number" v-model="v$.phoneNumber.$model" :classValue="classValue(v$.phoneNumber.$dirty , v$.phoneNumber.$error)" title="رقم الهاتف" :isReadOnly="formReadOnly" />
       </div>
     </div>
 
@@ -22,59 +27,69 @@
     </div>
 
     <div class="row gx-5">
-      <InputDate v-model="v$.fromDate.$model" :classValue="classValue(v$.fromDate.$dirty , v$.fromDate.$error)" title="من تاريخ" :isReadOnly="formReadOnly" />
-      <InputDate v-model="v$.toDate.$model" :classValue="classValue(v$.toDate.$dirty, v$.toDate.$error)" title="إلى تاريخ" :isReadOnly="formReadOnly" />
+      <FormComponent type="date" v-model="v$.fromDate.$model" :classValue="classValue(v$.fromDate.$dirty , v$.fromDate.$error)" title="من تاريخ" :isReadOnly="formReadOnly" />
+      <FormComponent type="date" v-model="v$.toDate.$model" :classValue="classValue(v$.toDate.$dirty, v$.toDate.$error)" title="إلى تاريخ" :isReadOnly="formReadOnly" />
     </div>
 
     <InputTextarea v-model="v$.excuse.$model" :classValue="classValue(v$.excuse.$dirty , v$.excuse.$error)" inputType="textarea" title="سبب الإجازة" :isReadOnly="formReadOnly" />
+    <InputTextarea v-if="this.$route.query.requestId && this.Database.isRequestRejected(parseInt(this.$route.query.requestId))" v-model="rejectReason" inputType="textarea" title="سبب الرفض" :isReadOnly="formReadOnly" />
 
-    <div v-if="this.Database.isCurrentUserManager()" style="text-align: center">
-      <button class="btn btn-danger px-4 py-2"> رفض </button>
-      <button class="btn btn-success px-4 py-2"> قبول </button>
+    <div v-if="this.Database.isCurrentUserManager() && !this.Database.isActionTaken(parseInt(this.$route.query.requestId))" style="text-align: center">
+      <button class="btn btn-danger px-4 py-2" @click="showRejectModal()"  > رفض </button>
+      <button class="btn btn-success px-4 py-2" @click="showAcceptModal()" > قبول </button>
     </div>
     <div v-if="!this.Database.isCurrentUserManager() && !this.$route.query.requestId" style="text-align: center">
-      <button class="btn btn-success px-4 py-2" @click="sendRequest">إرسال</button>
+      <button class="btn btn-success px-4 py-2" @click="showSendModal()">إرسال</button>
     </div>
   </div>
   <Copyright title="حقوق الطبع والنشر محفوظة" />
+  <button @click="test()"> test </button>
+  <Modal v-model="v$.rejectReason.$model" :classValue="classValue(v$.rejectReason.$dirty , v$.rejectReason.$error)" id="confirm-reject" type="reject" modalTitle="سبب الرفض" :action="rejectRequest" modalSubTitle="الرجاء إدخال سبب الرفض" yesButton="رفض"   />
+  <Modal id="confirm-accept" type="confirm"  modalTitle="تأكيد القبول" :action="acceptRequest" yesButton="نعم"   message="هل أنت متأكد من قبول طلب الإجازة"  />
+  <Modal id="confirm-send" type="confirm" modalTitle="تأكيد الإرسال" :action="sendRequest" yesButton="نعم" message="هل أنت متأكد من تقديم طلب الإجازة"  />
 </template>
 
 <script>
-import Copyright from "./Copyright.vue";
-import FormSectionTitle from "./FormSectionTitle.vue";
-import InputText from "./InputText.vue";
-import InputNumber from "./InputNumber.vue";
-import InputSelect from "./InputSelect.vue";
-import InputDate from "./InputDate.vue";
-import InputTextarea from "./InputTextarea.vue";
-import TopNavigationBar from "./TopNavigationBar.vue";
-import { inOrOutArray, vacationTypesArray } from '../../../constants.js'
+import Copyright from "../utils/Copyright.vue";
+import FormSectionTitle from "../FormComponents/FormSectionTitle.vue";
+import InputSelect from "../FormComponents/InputSelect.vue";
+import Modal from "../utils/Modal.vue";
+import InputTextarea from "../FormComponents/InputTextarea.vue";
+import FormComponent from "../FormComponents/FormComponent.vue";
+import TopNavigationBar from "../utils/TopNavigationBar.vue";
 import moment from 'moment';
+import { inOrOutArray, vacationTypesArray, Status } from '../../../constants.js'
 import { useVuelidate } from '@vuelidate/core'
-import { required , maxLength , minLength , minValue , between } from '@vuelidate/validators'
+import { required , maxLength , minLength , minValue } from '@vuelidate/validators'
+import bootstrap from '../../../node_modules/bootstrap/dist/js/bootstrap.js';
+
+const minDate1 = (minDateVal) => (dateVal) => {
+  return !moment(minDateVal).isAfter(dateVal);
+}
+const minDate2 = () => (dateVal, vm) => {
+  return !moment(vm.fromDate).isAfter(dateVal);
+}
+
 export default {
   name: "RequestForm",
   components: {
     Copyright,
     FormSectionTitle,
-    InputText,
     InputTextarea,
-    InputNumber,
     InputSelect,
-    InputDate,
+    FormComponent,
     TopNavigationBar,
+    Modal,
   },
   setup() {
     return { v$: useVuelidate()}
   },
-
-
   data() {
     return {
       fullName: '',
       phoneNumber: '',
-      fromDate: moment().format('YYYY-MM-DD').toString(),
-      toDate: moment().format('YYYY-MM-DD').toString(),
+      fromDate:  moment().format('YYYY-MM-DD'),
+      toDate:  moment().format('YYYY-MM-DD'),
       excuse: '',
       vacationType: 'سنوية',
       department: '',
@@ -82,46 +97,99 @@ export default {
       inOrOutArray: inOrOutArray,
       vacationTypesArray: vacationTypesArray,
       formReadOnly: false,
+      rejectReason: '',
     };
   },
   validations() {
+    console.log('here: ' + this.fromDate)
+    console.log('here: ' + this.toDate)
     return {
       fullName: {required , maxLengthValue: maxLength(30)},
       department: {required},
       phoneNumber: {required , minLengthValue: minLength(10), minValueValue: minValue(1)},
-      fromDate: {required , between: between(moment().format('YYYY-MM-DD').toString() , this.toDate.toString())},
-      toDate: {required , between: between(this.fromDate.toString() , '4000-01-01')},
+      fromDate: {required, minDateValue : minDate1(moment().format('YYYY-MM-DD'))},
+      toDate: {required, minDateValue: minDate2() },
       excuse: {required},
       vacationType: {required},
       inOrOut: {required},
+      rejectReason: {required},
     }
   },
   mounted() {
     if (this.$route.query.requestId) {
-        console.log(this.$route.query.requestId + "YES");
-      
         let requestId = parseInt(this.$route.query.requestId);
-        console.log(this.Database.getRequestWithId(requestId))
-        let userId = this.Database.getRequestWithId(requestId).userId;
+        let request = this.Database.getRequestWithId(requestId);
+        let userId = request.userId;
 
         this.formReadOnly = true;
 
         this.fullName = this.Database.getUserWithId(userId).name;
         this.phoneNumber = this.Database.getUserWithId(userId).phoneNumber;
 
-        this.department = this.Database.getRequestWithId(requestId).management;
-        this.vacationType = this.Database.getRequestWithId(requestId).holidayType;
-        this.inOrOut = this.Database.getRequestWithId(requestId).inOrOut;
-        this.excuse = this.Database.getRequestWithId(requestId).holidayReason;
-        this.fromDate = this.Database.getRequestWithId(requestId).fromDate;
-        this.toDate = this.Database.getRequestWithId(requestId).toDate;
-
+        this.department = request.management;
+        this.vacationType = request.holidayType;
+        this.inOrOut = request.inOrOut;
+        this.excuse = request.holidayReason;
+        this.fromDate = request.fromDate;
+        this.toDate = request.toDate;
+        this.rejectReason = request.rejectReason;
+        if (this.Database.isCurrentUserManager() && request.status.comp == Status.NotSeen.comp){
+          this.$forceUpdate() // temporary solution
+          this.Database.makeRequestSeen(requestId);
+        }
       }
-    else {
-      console.log('No');
-    }
   },
   methods: {
+    test() {console.log(this.fromDate)},
+    showSendModal(){
+        // console.log(this.v$.vacationType.$dirty , this.v$.vacationType.$error)
+        // console.log(this.v$.fromDate.$dirty , this.v$.fromDate.$error)
+        if ((!this.v$.vacationType.$dirty || !this.v$.vacationType.$error) &&
+            (!this.v$.inOrOut.$dirty || !this.v$.inOrOut.$error) &&
+            (!this.v$.fromDate.$dirty || !this.v$.fromDate.$error) &&
+            (!this.v$.toDate.$dirty || !this.v$.toDate.$error) &&
+            (this.v$.excuse.$dirty && !this.v$.excuse.$error)
+        ) {
+          var modal = new bootstrap.Modal('#confirm-send');
+          modal.toggle()
+        }
+        this.v$.excuse.$touch()
+        this.v$.inOrOut.$touch()
+        this.v$.fromDate.$touch()
+        this.v$.toDate.$touch()
+        this.v$.vacationType.$touch()
+    },
+    showAcceptModal(){
+        var modal = new bootstrap.Modal('#confirm-accept');
+        modal.toggle()
+        console.log(modal)
+    },
+    showRejectModal(){
+        var modal = new bootstrap.Modal('#confirm-reject');
+        modal.toggle()
+    },
+    showAlert() {
+      const alert = document.getElementById('success-alert');
+      alert.classList.toggle('show-alert')
+    },
+    rejectRequest() {
+        this.v$.rejectReason.$touch()
+        if (this.v$.rejectReason.$error){
+          var modal = new bootstrap.Modal('#confirm-reject');
+          modal.toggle()
+        } else {
+          let requestId = parseInt(this.$route.query.requestId);
+          this.Database.rejectRequest(requestId , this.rejectReason)
+          this.$forceUpdate()
+        }
+
+
+    },
+    acceptRequest(){
+      let requestId = parseInt(this.$route.query.requestId);
+      this.Database.acceptRequest(requestId);
+      this.$forceUpdate();
+    },
     sendRequest() {
       const newVacation = this.vacationType;
       const newToDate = this.toDate;
@@ -134,20 +202,16 @@ export default {
         management: this.Database.getRequestWithId(this.Database.getCurrentUserId()).management,
         fromDate: newFromDate,
         toDate: newToDate,
-        status: 'جديد',
+        status: Status.NotSeen,
         inOrOut: newInOrOut,
         userId: this.Database.getCurrentUserId(),
         holidayReason: newExcuse,
-        requestId: Math.floor(Math.random() * 10000),
+        requestId: this.Database.getUniqueId(),
       };
       this.Database.addRequest(newRequest);
-
-      // console.log(newRequest),
-      // console.log(this.Database.getRequestArray())
+      this.showAlert();
     },
     classValue(dirty , invalid){
-      // console.log(this.fromDate , this.toDate)
-      // console.log(dirty , invalid)
       if (!dirty){
         return '';
       } else if (invalid){
@@ -178,5 +242,11 @@ div {
 button {
   margin-right: 5px;
   margin-left: 5px;
+}
+.hide-alert {
+  display: none;
+}
+.show-alert {
+  display: block;
 }
 </style>

@@ -2,49 +2,41 @@
 <template>
   <TopNavigationBar number="2" />
   <div class="container py-5">
-<table>
+    <table class="table">
       <tr>
-        <th>تفاصيل</th>
-        <th>الحالة</th>
-        <th>إلى تاريخ</th>
-        <th>من تاريخ</th>
-        <th>الدائرة الإدارية</th>
-        <th>نوع الإجازاة</th>
-        <th v-if="this.Database.isCurrentUserManager()">اسم الموظف</th>
-      </tr>
-      <tr class="row-data" v-if="this.Database.isCurrentUserManager()"
-        v-for="(request, index) in this.Database.getRequestArray()" :key="index">
-        <td> <button @click="viewDetails(request.userId)" class="see-more"> &#x2B9C; اقرأ المزيد </button> </td>
-        <td> {{ request.status}} </td>
-        <td> {{ request.fromDate }} </td>
-        <td> {{ request.toDate }} </td>
-        <td> {{ request.management }} </td>
-        <td>{{ request.holidayType }}</td>
-        <td> {{ this.Database.getUserWithId(request.userId).name }} </td>
+        <th v-if="this.Database.isCurrentUserManager()"> اسم الموظف </th>
+        <th> من تاريخ  </th>
+        <th> إلى تاريخ  </th>
+        <th> نوع الإجازة  </th>
+        <th> الحالة  </th>
+        <th> تفاصيل  </th>
 
       </tr>
-      <tr class="row-data" v-if="!this.Database.isCurrentUserManager()"
-        v-for="(request, index) in this.Database.getRequestArrayWithUserId(this.Database.getCurrentUserId())"
-        :key="index">
-        <td> <button @click="viewDetails(request.requestId)" class="see-more"> &#x2B9C; اقرأ المزيد </button> </td>
-        <td>{{ request.status}}</td>
-        <td> {{ request.toDate }} </td>
+      <tr class="row-data" v-for="(request, index) in requests" :key="index">
+        <td v-if="this.Database.isCurrentUserManager()"> {{ this.Database.getUserWithId(request.userId).name }} </td>
         <td> {{ request.fromDate }} </td>
-        <td> {{ request.management }} </td>
-        <td> {{ request.holidayType }} </td>
+        <td> {{ request.toDate }} </td>
+        <td>{{ request.holidayType }}</td>
+        <td> {{ this.Database.isCurrentUserManager() ? request.status.ManagerMessage : request.status.EmployeeMessage }} </td>
+        <td> <button @click="viewDetails(request.requestId)" class="see-more">  اقرأ المزيد &#x2B9C; </button> </td>
       </tr>
     </table>
 
-    <div v-if="!this.Database.isCurrentUserManager()" style="display:block; text-align: center; margin-top: 50px;">
+    <div v-if="!this.Database.isCurrentUserManager()" style="text-align: center; margin-top: 50px;">
       <button @click="newRequest" class="btn btn-success px-5 py-3"> تقديم طلب جديد </button>
     </div>
   </div>
 </template>
  
 <script>
-import TopNavigationBar from '../RequestForm/TopNavigationBar.vue'
+import TopNavigationBar from '../utils/TopNavigationBar.vue'
 export default {
   name: 'List',
+  data() {
+    return {
+      requests: this.Database.isCurrentUserManager() ? this.Database.getRequestArray() : this.Database.getRequestArrayWithUserId(this.Database.getCurrentUserId()),
+    }
+  },
   mounted() {
       // console.log(this.Database.getCurrentUser())
       // console.log(!this.Database.isCurrentUserManager())
@@ -124,5 +116,13 @@ th {
 
 .row-data td:hover {
   background: rgba(62, 58, 58, 0.0542);
+}
+
+i {
+  transition: 0.15s;
+}
+i:hover {
+  cursor: pointer;
+  color:grey;
 }
 </style>

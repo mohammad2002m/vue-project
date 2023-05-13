@@ -9,7 +9,6 @@
 
     <div style="padding-left: 30px; padding-right: 30px; padding-bottom: 30px; padding-top: 20px;">
 
-
       <div class="input-with-label" dir="rtl">
         <label for="" style="font-size: 14px;"> اسم المستخدم</label>
         <input dir="rtl" v-model="username" type="text" class="form-control username" placeholder="اسم المستخدم"
