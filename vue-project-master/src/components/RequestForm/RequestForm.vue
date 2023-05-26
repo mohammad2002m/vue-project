@@ -34,7 +34,7 @@
     <InputTextarea v-model="v$.excuse.$model" :classValue="classValue(v$.excuse.$dirty , v$.excuse.$error)" inputType="textarea" title="سبب الإجازة" :isReadOnly="formReadOnly" />
     <InputTextarea v-if="this.$route.query.requestId && this.Database.isRequestRejected(parseInt(this.$route.query.requestId))" v-model="rejectReason" inputType="textarea" title="سبب الرفض" :isReadOnly="formReadOnly" />
 
-    <div v-if="this.Database.isCurrentUserManager() && !this.Database.isActionTaken(parseInt(this.$route.query.requestId))" style="text-align: center">
+    <div v-if="this.$route.query.requestId && this.Database.isShowRejectAccpetForUserRequest(this.Database.getCurrentUserId() , parseInt(this.$route.query.requestId))" style="text-align: center">
       <button class="btn btn-danger px-4 py-2" @click="showRejectModal()"  > رفض </button>
       <button class="btn btn-success px-4 py-2" @click="showAcceptModal()" > قبول </button>
     </div>
@@ -58,7 +58,7 @@ import InputTextarea from "../FormComponents/InputTextarea.vue";
 import FormComponent from "../FormComponents/FormComponent.vue";
 import TopNavigationBar from "../utils/TopNavigationBar.vue";
 import moment from 'moment';
-import { inOrOutArray, vacationTypesArray, Status } from '../../../constants.js'
+import { inOrOutArray, vacationTypesArray } from '../../../constants.js'
 import { useVuelidate } from '@vuelidate/core'
 import { required , maxLength , minLength , minValue } from '@vuelidate/validators'
 import bootstrap from '../../../node_modules/bootstrap/dist/js/bootstrap.js';
@@ -133,10 +133,6 @@ export default {
         this.fromDate = request.fromDate;
         this.toDate = request.toDate;
         this.rejectReason = request.rejectReason;
-        if (this.Database.isCurrentUserManager() && request.status.comp == Status.NotSeen.comp){
-          this.$forceUpdate() // temporary solution
-          this.Database.makeRequestSeen(requestId);
-        }
       }
   },
   methods: {
@@ -162,10 +158,10 @@ export default {
     showAcceptModal(){
         var modal = new bootstrap.Modal('#confirm-accept');
         modal.toggle()
-        console.log(modal)
     },
     showRejectModal(){
         var modal = new bootstrap.Modal('#confirm-reject');
+        this.rejectReason = '';
         modal.toggle()
     },
     showAlert() {
@@ -176,6 +172,7 @@ export default {
         this.v$.rejectReason.$touch()
         if (this.v$.rejectReason.$error){
           var modal = new bootstrap.Modal('#confirm-reject');
+          this.rejectReason = '';
           modal.toggle()
         } else {
           let requestId = parseInt(this.$route.query.requestId);
@@ -197,16 +194,20 @@ export default {
       const newExcuse = this.excuse;
       const newInOrOut = this.inOrOut;
 
+      console.log(Date.now())
       let newRequest = {
         holidayType: newVacation,
-        management: this.Database.getRequestWithId(this.Database.getCurrentUserId()).management,
         fromDate: newFromDate,
         toDate: newToDate,
-        status: Status.NotSeen,
+        status: this.Status.NotSeen,
         inOrOut: newInOrOut,
         userId: this.Database.getCurrentUserId(),
         holidayReason: newExcuse,
         requestId: this.Database.getUniqueId(),
+        requestDate: Date.now(),
+        step: 0,
+        requestType: 0,
+        rejectReason: '',
       };
       this.Database.addRequest(newRequest);
       this.showAlert();

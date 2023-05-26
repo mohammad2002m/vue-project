@@ -1,13 +1,12 @@
-class Status {
-    static NotSeen = new Status(0,"جديد", "غير مقروء");
-    static Seen = new Status(1,"مقروء" , "قيد المراجعة");
-    static Rejected = new Status(2,"تم الرفض" , "مرفوض");
-    static Accepted = new Status(3,"تم القبول" , "مقبول");
-    constructor(comp , ManagerMessage , EmployeeMessage){
-        this.comp = comp;
-        this.ManagerMessage = ManagerMessage;
-        this.EmployeeMessage = EmployeeMessage;
-    }
+const Status = {
+    0: {ManagerMessage: 'جديد' , EmployeeMessage: 'غير مقروء'},
+    1: {ManagerMessage: 'مقروء' , EmployeeMessage: 'قيد المراجعة'},
+    2: {ManagerMessage: 'تم الرفض' , EmployeeMessage: 'مرفوض'},
+    3: {ManagerMessage: 'تم القبول' , EmployeeMessage: 'مقبول'},
+    NotSeen: 0,
+    Seen: 1,
+    Rejected: 2,
+    Accepted: 3,
 }
 const inOrOutArray = ['داخل البلاد' , 'خارج البلاد']
 const vacationTypesArray = ['سنوية' , 'رسمية' , 'مرضية' , 'زواج'  , 'أمومة' , 'بدون راتب' , 'حج' , 'وفاة قريب مباشر' , 'وفاة قريب غير مباشر']

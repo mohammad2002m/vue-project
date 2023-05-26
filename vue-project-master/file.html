@@ -1,0 +1,310 @@
+<html>
+<head>
+  <title> Createing Database </title>
+  <script type="module">
+    import { Status } from './constants.js';
+    class Database {
+      static currentUserId = null;
+      static getFlow() {
+        return JSON.parse(localStorage.getItem("businessFlow"));
+      }
+      static getFlowForRequestId(requestId) {
+        const requestType = Database.getRequestWithId(requestId).requestType
+        const businessFlow = Database.getFlow()
+        return businessFlow[requestType];
+      }
+      static isShowRejectAccpet(){
+        const flow = Database.getFlowForRequestId(requestId)
+        const request = Database.getRequestWithId(requestId)
+        const index = flow.indexOf(role);
+        if (index != request.step) return false;
+        if (index == flow.length - 1){
+          return (request.status != Status.Accepted && request.status != Status.Rejected);
+        } else {
+          return true;
+        }
+      }
+      static getTypeForRoleToSend(role, requestId){
+        return 0;
+      }
+      static isShowRoleRequest(role , requestId) {
+        const flow = Database.getFlowForRequestId(requestId)
+        const request = Database.getRequestWithId(requestId)
+        const index = flow.indexOf(role);
+        if (index == -1) return false;
+        if (index <= request.step) return true;
+        return false;
+        // continue
+        // rejected and index > step --> then it should be shown as notification
+      }
+      static getStatusForRoleRequest(role, requestId) {
+        const flow = Database.getFlowForRequestId(requestId)
+        const request = Database.getRequestWithId(requestId)
+        const index = flow.indexOf(role);
+        if (index < request.step){
+          return Status.Accepted;
+        } else if (index == request.step){
+          return request.status;
+        }
+      }
+      static initDatabase() {
+        let userTable = [];
+        let requestTable = [];
+        let roles = {
+          0: 'رئيس الجامعة',
+          1: 'نائب إداري',
+          2: 'شؤون الموظفين',
+          3: 'مدير الدائرة الإدارية',
+          4: 'موظف',
+        };
+        let businessFlow = {
+          0: [3, 2, 1, 0],
+          1: [3, 2, 1],
+          2: [1, 0],
+          3: [2, 1, 0],
+        };
+        userTable.push(
+          {
+            userId: 1,
+            name: "قصي أبو سوط",
+            username: "a",
+            password: "a",
+            role: 1,
+            email: "q2016@gmail.com",
+            phoneNumber: "0599382984",
+          },
+          {
+            userId: 2,
+            name: "محمد بن بلال",
+            username: "b",
+            password: "b",
+            role: 1,
+            email: "moh2020@gmail.com",
+            phoneNumber: "0569581089",
+          },
+          {
+            userId: 3,
+            name: "أبو شريف",
+            username: "c",
+            password: "c",
+            role: 0,
+            email: "test@gmail.com",
+            phoneNumber: "0595118296",
+          },
+          {
+            userId: 4,
+            name: "محمد بلال",
+            username: "d",
+            password: "d",
+            role: 0,
+            email: "test@gmail.com",
+            phoneNumber: "0595118296",
+          },
+        );
+
+        requestTable.push(
+          {
+            holidayType: "حج",
+            management: "كلية التكنولوجيا",
+            fromDate: "2023-05-01",
+            toDate: "2023-05-05",
+            status: 0,
+            inOrOut: "داخل البلاد",
+            userId: 1,
+            holidayReason: "طشة مع العائلة الكريمة",
+            requestId: 0,
+            step: 1,
+            rejectReason: '',
+            requestType: 0,
+          },
+          {
+            holidayType: "زواج",
+            management: "شؤون الطلبة",
+            fromDate: "2023-06-01",
+            toDate: "2023-06-02",
+            status: 0,
+            inOrOut: "خارج البلاد",
+            userId: 2,
+            holidayReason: "التعرض لاصابة بمرض السرطان",
+            requestId: 1,
+            rejectReason: '',
+            step: 0,
+            requestType: 1,
+          },
+          {
+            holidayType: "رسمية",
+            management: "كلية الطب",
+            fromDate: "2023-07-01",
+            toDate: "2023-07-01",
+            status: 0,
+            inOrOut: "داخل البلاد",
+            userId: 3,
+            holidayReason: "لاسباب شخصية لا الإفصاح عنها",
+            requestId: 2,
+            rejectReason: '',
+            requestType: 2,
+            step: 2,
+          }
+        );
+
+        localStorage.setItem("userTable", JSON.stringify(userTable));
+        localStorage.setItem("requestTable", JSON.stringify(requestTable));
+        localStorage.setItem("businessFlow", JSON.stringify(businessFlow));
+
+        let users = JSON.parse(localStorage.getItem("userTable"));
+        let requests = JSON.parse(localStorage.getItem("requestTable"));
+
+        localStorage.setItem("userTable", JSON.stringify(users));
+        localStorage.setItem("requestTable", JSON.stringify(requests));
+      }
+
+      static getCurrentUserId() {
+        return JSON.parse(localStorage.getItem("currentUserId"));
+      }
+
+      static getNameforRequestId() {
+        return this.getUserWithId(this.getRequestArray().userId).name;
+      }
+
+      static setCurrentUserId(userId) {
+        localStorage.setItem("currentUserId", JSON.stringify(userId));
+      }
+
+      static getAllUsersWithoutCurrentId(userId) {
+        return this.getRequestArray().filter((request) => request.userId != userId);
+      }
+
+      static getCurrentUser() {
+        return Database.getUserWithId(
+          JSON.parse(localStorage.getItem("currentUserId"))
+        );
+      }
+
+      static getUsersArray() {
+        return JSON.parse(localStorage.getItem("userTable"));
+      }
+
+      static getUserWithId(userId) {
+        return Database.getUsersArray().find((user) => user.userId === userId);
+      }
+
+      static getRequestArray() {
+        return JSON.parse(localStorage.getItem("requestTable"));
+      }
+
+      static getRequestArrayWithUserId(userId) {
+        return Database.getRequestArray().filter(
+          (request) => request.userId === userId
+        );
+      }
+
+      static getRequestWithId(requestId) {
+        return Database.getRequestArray().filter(
+          (request) => request.requestId === requestId
+        )[0];
+      }
+
+      static getCurrentRole() {
+        return Database.getCurrentUser().role;
+      }
+
+      static addRequest(request) {
+        const requestTableFromLocalStorage = Database.getRequestArray();
+        requestTableFromLocalStorage.push(request);
+        localStorage.setItem(
+          "requestTable",
+          JSON.stringify(requestTableFromLocalStorage)
+        );
+      }
+      static isActionTaken(requestId) {
+        let request = Database.getRequestWithId(requestId)
+        return (request.status == Status.Accepted) || (request.status == Status.Rejected);
+      }
+      static isRequestRejected(requestId) {
+        let request = Database.getRequestWithId(requestId)
+        return request.status == Status.Rejected;
+      }
+
+      static rejectRequest(requestId, rejectReason) {
+        const requests = Database.getRequestArray();
+        requests.filter((request) => {
+          if (request.requestId == requestId) {
+            request.status = Status.Rejected;
+            request.rejectReason = rejectReason;
+          }
+        })
+        localStorage.setItem("requestTable", JSON.stringify(requests));
+      }
+      static acceptRequest(requestId) {
+        const requests = Database.getRequestArray();
+        const flow = Database.getFlowForRequestId(requestId)
+        requests.filter((request) => {
+          if (request.requestId == requestId) {
+            if (request.step == flow.length - 1){
+              request.status = Status.Accepted;
+            } else {
+              request.status = Status.NotSeen;
+              request.step += 1;
+            }
+          }
+        })
+        localStorage.setItem("requestTable", JSON.stringify(requests));
+      }
+      static makeRequestSeen(requestId) {
+        const requests = Database.getRequestArray();
+        requests.filter((request) => {
+          if (request.requestId == requestId) {
+            request.status = Status.Seen;
+          }
+        })
+        localStorage.setItem("requestTable", JSON.stringify(requests));
+
+      }
+      static getUniqueId() {
+        return Database.getRequestArray().length;
+      }
+    }
+
+    Database.initDatabase()
+    console.log('id: ' + Database.getRequestWithId(0).requestId , '  type:' , Database.getRequestWithId(0).requestType , '   step:', Database.getRequestWithId(0).step)
+    console.log('id: ' + Database.getRequestWithId(1).requestId , '  type:' , Database.getRequestWithId(1).requestType , '   step:', Database.getRequestWithId(1).step)
+    console.log('id: ' + Database.getRequestWithId(2).requestId , '  type:' , Database.getRequestWithId(2).requestType , '   step:', Database.getRequestWithId(2).step)
+    console.log('Roles we have: 0 0 1 1 2 2 3 4 4')
+    console.log('0:' , Database.getFlowForRequestId(0))
+    console.log('1:' , Database.getFlowForRequestId(1))
+    console.log('2:' , Database.getFlowForRequestId(2))
+    console.log(Database.isShowRoleRequest(2 , 0))
+    console.log('working so far ...')
+    console.log(Database.getRequestWithId(1))
+    let arr = []
+    for (let i = 0; i <= 4; i++){ if (Database.isShowRoleRequest(i , 1)){ arr.push(i) } }
+    console.log(arr)
+    Database.acceptRequest(1)
+    console.log(Database.getRequestWithId(1))
+    arr = []
+    for (let i = 0; i <= 4; i++){ if (Database.isShowRoleRequest(i , 1)){ arr.push(i) } }
+    console.log(arr)
+    Database.acceptRequest(1)
+    console.log(Database.getRequestWithId(1))
+    arr = []
+    for (let i = 0; i <= 4; i++){ if (Database.isShowRoleRequest(i , 1)){ arr.push(i) } }
+    console.log(arr)
+    Database.acceptRequest(1)
+    console.log(Database.getRequestWithId(1))
+    arr = []
+    for (let i = 0; i <= 4; i++){ if (Database.isShowRoleRequest(i , 1)){ arr.push(i) } }
+    console.log(arr)
+    Database.acceptRequest(1)
+    console.log(Database.getRequestWithId(1))
+    arr = []
+    for (let i = 0; i <= 4; i++){ if (Database.isShowRoleRequest(i , 1)){ arr.push(i) } }
+    console.log(arr)
+  </script>
+
+  
+</head>
+
+<body>
+</body>
+
+</html>

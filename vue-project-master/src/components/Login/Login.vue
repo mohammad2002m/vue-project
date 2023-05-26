@@ -22,7 +22,9 @@
       </div>
 
       <div dir="rtl" style="margin-bottom: 30px; margin-right: 4px;">
-        <a href=""> هل نسيت كلمة المرور ؟</a>
+        <button @click="reset()" class="forgitStyle">
+          <a href=""> هل نسيت كلمة المرور ؟</a>
+        </button>
       </div>
 
       <button @click="Login()" class="btn btn-success" style="width: 100%; margin-bottom: 20px;"> تسجيل الدخول </button>
@@ -57,6 +59,10 @@ export default {
       if (!isFound) {
         alert("Sorry the user not found");
       }
+    },
+    reset() {
+      this.Database.initDatabase();
+      this.$router.push('ResetCheck');
     }
   }
 }
@@ -64,6 +70,11 @@ export default {
 </script>
 
 <style scoped>
+.forgitStyle {
+  border: none;
+  background-color: rgba(255, 255, 255, 0);
+}
+
 .password {
   background: url('../../assets/lock.svg') no-repeat;
   background-position: right 5px bottom 50%;
@@ -133,6 +144,7 @@ img {
   margin-right: 5px;
   margin-bottom: 8px;
 }
+
 .line {
   height: 1px;
   background-color: lightgrey;

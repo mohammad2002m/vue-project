@@ -8,7 +8,7 @@
         <th> من تاريخ  </th>
         <th> إلى تاريخ  </th>
         <th> نوع الإجازة  </th>
-        <th> الحالة  </th>
+        <th> الحالة <i @click="sortRequests()" class="fa fa-sort"></i></th>
         <th> تفاصيل  </th>
 
       </tr>
@@ -16,8 +16,8 @@
         <td v-if="this.Database.isCurrentUserManager()"> {{ this.Database.getUserWithId(request.userId).name }} </td>
         <td> {{ request.fromDate }} </td>
         <td> {{ request.toDate }} </td>
-        <td>{{ request.holidayType }}</td>
-        <td> {{ this.Database.isCurrentUserManager() ? request.status.ManagerMessage : request.status.EmployeeMessage }} </td>
+        <td> {{ request.holidayType }}</td>
+        <td> {{ this.Database.getStatusMessageForUserIdRequest(this.Database.getCurrentUserRole(), request.requestId) }} </td>
         <td> <button @click="viewDetails(request.requestId)" class="see-more">  اقرأ المزيد &#x2B9C; </button> </td>
       </tr>
     </table>
@@ -34,12 +34,14 @@ export default {
   name: 'List',
   data() {
     return {
-      requests: this.Database.isCurrentUserManager() ? this.Database.getRequestArray() : this.Database.getRequestArrayWithUserId(this.Database.getCurrentUserId()),
+      requests: this.Database.getRequestArrayToShowForUserId(this.Database.getCurrentUserId()),
     }
   },
   mounted() {
-      // console.log(this.Database.getCurrentUser())
-      // console.log(!this.Database.isCurrentUserManager())
+      this.requests.sort((r1 , r2) => {
+        return r1.requestDate - r2.requestDate;
+      })
+      console.log('getMounted');
   },
   components: {
     TopNavigationBar,
@@ -48,8 +50,17 @@ export default {
     newRequest() {
       this.$router.push('RequestForm')
     },
+    sortRequests(){
+      this.requests.sort((r1 , r2) => {
+        return r1.status - r2.status;
+      })
+    },
     viewDetails(requestId) {
       this.$router.push({ name: 'RequestForm', query: { requestId: JSON.stringify(requestId) } })
+      if (this.Database.IsRequestStepAtUserId(this.Database.getCurrentUserId() , requestId) && this.Database.getRequestWithId(requestId).status == this.Status.NotSeen){
+        this.$forceUpdate() // temporary solution
+        this.Database.makeRequestSeen(requestId);
+      }
     },
   },
 }
